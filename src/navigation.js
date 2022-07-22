@@ -16,7 +16,7 @@ window.addEventListener('hashchange', navigator, false);
 
 
 function navigator() {
-  console.log({ location })
+  // console.log({ location })
 
   if (location.hash.startsWith('#trends')) {
     trendsPage();
@@ -94,6 +94,10 @@ function movieDetailsPage() {
   categoriesPreviewSection.classList.add('inactive');
   genericSection.classList.add('inactive');
   movieDetailSection.classList.remove('inactive');
+
+  // ['#movie', '23445']
+  const [_, movieId] = location.hash.split('=');
+  getMovieById(movieId);
 }
 
 function searchPage() {
