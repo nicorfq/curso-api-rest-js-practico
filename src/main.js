@@ -21,9 +21,9 @@ const lazyLoader = new IntersectionObserver((entries) => {
 
 
 function createMovies(
-  movies, 
-  container, 
-  { 
+  movies,
+  container,
+  {
     lazyLoad = false,
     clean = true,
   } = {},
@@ -44,7 +44,7 @@ function createMovies(
     movieImg.setAttribute('alt', movie.title);
     movieImg.addEventListener('error', console.log)
     movieImg.setAttribute(
-      lazyLoad ? 'data-img' : 'src', 
+      lazyLoad ? 'data-img' : 'src',
       'https://image.tmdb.org/t/p/w300' + movie.poster_path,
     );
     movieImg.addEventListener('error', () => {
@@ -111,9 +111,40 @@ async function getMoviesByCategory(id) {
   const movies = data.results;
   maxPage = data.total_pages;
 
-  createMovies(movies, genericSection, true);
+  createMovies(movies, genericSection, { lazyLoad: true });
+}
+//
+function getPaginatedMoviesByCategory(id) {
+  return async function () {
+    const {
+      scrollTop,
+      scrollHeight,
+      clientHeight
+    } = document.documentElement;
+
+    const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight - 15);
+    const pageIsNotMax = page < maxPage;
+
+    if (scrollIsBottom && pageIsNotMax) {
+      page++;
+      const { data } = await api('discover/movie', {
+        params: {
+          with_genres: id,
+          page,
+        },
+      })
+      const movies = data.results;
+
+      createMovies(
+        movies,
+        genericSection,
+        { lazyLoad: true, clean: false },
+      );
+    }
+  }
 }
 
+//
 async function getMoviesBySearch(query) {
   const { data } = await api('search/movie', {
     params: {
@@ -129,15 +160,15 @@ async function getMoviesBySearch(query) {
 
 function getPaginatedMoviesBySearch(query) {
   return async function () {
-    const { 
+    const {
       scrollTop,
       scrollHeight,
       clientHeight
     } = document.documentElement;
-  
+
     const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight - 15);
     const pageIsNotMax = page < maxPage;
-  
+
     if (scrollIsBottom && pageIsNotMax) {
       const { data } = await api('search/movie', {
         params: {
@@ -146,7 +177,7 @@ function getPaginatedMoviesBySearch(query) {
         },
       })
       const movies = data.results;
-    
+
       createMovies(
         movies,
         genericSection,
@@ -156,32 +187,32 @@ function getPaginatedMoviesBySearch(query) {
   }
 }
 
-async function getPaginatedMoviesBySearch(query) {
-  const { 
-    scrollTop,
-    scrollHeight,
-    clientHeight
-  } = document.documentElement;
+// async function getPaginatedMoviesBySearch(query) {
+//   const {
+//     scrollTop,
+//     scrollHeight,
+//     clientHeight
+//   } = document.documentElement;
 
-  const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight - 15);
-  const pageIsNotMax = page < maxPage;
+//   const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight - 15);
+//   const pageIsNotMax = page < maxPage;
 
-  if (scrollIsBottom && pageIsNotMax) {
-    const { data } = await api('search/movie', {
-      params: {
-        query,
-        page,
-      },
-    })
-    const movies = data.results;
-  
-    createMovies(
-      movies,
-      genericSection,
-      { lazyLoad: true, clean: false },
-    );
-  }
-}
+//   if (scrollIsBottom && pageIsNotMax) {
+//     const { data } = await api('search/movie', {
+//       params: {
+//         query,
+//         page,
+//       },
+//     })
+//     const movies = data.results;
+
+//     createMovies(
+//       movies,
+//       genericSection,
+//       { lazyLoad: true, clean: false },
+//     );
+//   }
+// }
 
 async function getTrendingMovies() {
   const { data } = await api('trending/movie/day')
@@ -193,7 +224,7 @@ async function getTrendingMovies() {
 }
 
 async function getPaginatedTrendingMovies() {
-  const { 
+  const {
     scrollTop,
     scrollHeight,
     clientHeight
@@ -211,7 +242,7 @@ async function getPaginatedTrendingMovies() {
     });
     const movies = data.results;
     console.log(data.total_pages)
-  
+
     createMovies(
       movies,
       genericSection,
@@ -219,7 +250,7 @@ async function getPaginatedTrendingMovies() {
     );
   }
 }
- 
+
 async function getMovieById(id) {
   const { data: movie } = await api('movie/' + id);
 
